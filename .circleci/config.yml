@@ -21,13 +21,13 @@ jobs:
       - checkout
       - run: make ARCHITECTURES=i386
       - run: make ARCHITECTURES=i386 push
-  build_arm32v6:
+  build_arm32v7:
     working_directory: ~/docker-cadvisor
     machine: true
     steps:
       - checkout
-      - run: make ARCHITECTURES=arm32v6
-      - run: make ARCHITECTURES=arm32v6 push
+      - run: make ARCHITECTURES=arm32v7
+      - run: make ARCHITECTURES=arm32v7 push
   build_arm64v8:
     working_directory: ~/docker-cadvisor
     machine: true
@@ -65,7 +65,7 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - build_arm32v6:
+      - build_arm32v7:
           requires:
             - build_amd64
           filters:
@@ -81,7 +81,7 @@ workflows:
           requires:
             - build_amd64
             - build_i386
-            - build_arm32v6
+            - build_arm32v7
             - build_arm64v8
           filters:
             tags:
