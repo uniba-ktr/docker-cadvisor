@@ -21,10 +21,11 @@ ARG VERSION=1.3.3
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VCS_URL
+ENV DEBIAN_FRONTEND noninteractive
 
 # ZFS MISSING!
 RUN apt-get update && \
-    apt-get install -yq --no-install-recommends ca-certificates wget dmsetup thin-provisioning-tools && \
+    apt-get install -yq --no-install-recommends dmsetup thin-provisioning-tools && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     echo 'hosts: files mdns4_minimal [NOTFOUND=return] dns mdns4' >> /etc/nsswitch.conf
@@ -36,10 +37,10 @@ COPY --from=build /build/cadvisor-linux-${CADVISOR_ARCH} /usr/bin/cadvisor
 EXPOSE 8080
 ENTRYPOINT ["/usr/bin/cadvisor", "-logtostderr"]
 LABEL de.uniba.ktr.cadvisor.version=$VERSION \
-    de.uniba.ktr.cadvisor.name="cAdvisor" \
-    de.uniba.ktr.cadvisor.docker.cmd="docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:rw --volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro --volume=/dev/disk/:/dev/disk:ro --publish=8080:8080 --detach=true --name=cadvisor unibaktr/cadvisor" \
-    de.uniba.ktr.cadvisor.vendor="Marcel Grossmann" \
-    de.uniba.ktr.cadvisor.architecture=$ARCH \
-    de.uniba.ktr.cadvisor.vcs-ref=$VCS_REF \
-    de.uniba.ktr.cadvisor.vcs-url=$VCS_URL \
-    de.uniba.ktr.cadvisor.build-date=$BUILD_DATE
+      de.uniba.ktr.cadvisor.name="cAdvisor" \
+      de.uniba.ktr.cadvisor.docker.cmd="docker run --volume=/:/rootfs:ro --volume=/var/run:/var/run:rw --volume=/sys:/sys:ro --volume=/var/lib/docker/:/var/lib/docker:ro --volume=/dev/disk/:/dev/disk:ro --publish=8080:8080 --detach=true --name=cadvisor unibaktr/cadvisor" \
+      de.uniba.ktr.cadvisor.vendor="Marcel Grossmann" \
+      de.uniba.ktr.cadvisor.architecture=$ARCH \
+      de.uniba.ktr.cadvisor.vcs-ref=$VCS_REF \
+      de.uniba.ktr.cadvisor.vcs-url=$VCS_URL \
+      de.uniba.ktr.cadvisor.build-date=$BUILD_DATE
