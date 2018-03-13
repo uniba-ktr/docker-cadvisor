@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  compile:
+  compile_go:
     working_directory: ~/docker-cadvisor
     machine:
       image: circleci/classic:201711-01
@@ -49,31 +49,31 @@ jobs:
 workflows:
   version: 2
   build-and-deploy:
-      - compile:
+      - compile_go:
           filters:
             tags:
               only: /.*/
       - build_amd64:
           requires:
-            - compile
+            - compile_go
           filters:
             tags:
               only: /.*/
       - build_i386:
           requires:
-            - compile
+            - compile_go
           filters:
             tags:
               only: /.*/
       - build_arm32v7:
           requires:
-            - compile
+            - compile_go
           filters:
             tags:
               only: /.*/
       - build_arm64v8:
           requires:
-            - compile
+            - compile_go
           filters:
             tags:
               only: /.*/
