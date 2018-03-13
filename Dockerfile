@@ -1,15 +1,13 @@
 ARG IMAGE_TARGET=debian:stretch-slim
+ARG BUILD_BASE=karalabe/xgo-latest
 
 # first image to download qemu and make it executable
-FROM alpine AS qemu
+FROM ${BUILD_BASE} AS qemu
 ARG QEMU=x86_64
 ARG VERSION=1.3.3
 ADD https://github.com/multiarch/qemu-user-static/releases/download/v2.11.0/qemu-${QEMU}-static /qemu-${QEMU}-static
 RUN chmod +x /qemu-${QEMU}-static
-
-FROM karalabe/xgo-latest AS build
-
-RUN xgo --targets=linux/386,linux/amd64,linux/arm-5,linux/arm-6,linux/arm-7,linux/arm64 github.com/google/cadvisor
+RUN if [ ! -d "/build" ]; then xgo --targets=linux/386,linux/amd64,linux/arm-5,linux/arm-6,linux/arm-7,linux/arm64 github.com/google/cadvisor; fi
 
 # second image to be deployed on dockerhub
 FROM ${IMAGE_TARGET}
@@ -32,7 +30,7 @@ RUN apt-get update && \
 
 # Grab cadvisor from the staging directory.
 # TODO: cadvisors
-COPY --from=build /build/cadvisor-linux-${CADVISOR_ARCH} /usr/bin/cadvisor
+COPY --from=qemu /build/cadvisor-linux-${CADVISOR_ARCH} /usr/bin/cadvisor
 
 EXPOSE 8080
 ENTRYPOINT ["/usr/bin/cadvisor", "-logtostderr"]

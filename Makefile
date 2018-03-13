@@ -7,6 +7,9 @@ VERSION = $(shell cat VERSION)
 ifeq ($(REPO),)
   REPO = cadvisor
 endif
+ifeq ($(BUILD_BASE),)
+  BUILD_BASE = karalabe/xgo-latest
+endif
 ifeq ($(CIRCLE_TAG),)
 	TAG = latest
 else
@@ -18,6 +21,7 @@ all: $(ARCHITECTURES)
 $(ARCHITECTURES):
 	@docker run --rm --privileged $(MULTIARCH) --reset
 	@docker build \
+			--build-arg BUILD_BASE=$(BUILD_BASE) \
 			--build-arg IMAGE_TARGET=$@/$(IMAGE_TARGET) \
 			--build-arg QEMU=$(strip $(call qemuarch,$@)) \
 			--build-arg ARCH=$@ \
@@ -27,6 +31,9 @@ $(ARCHITECTURES):
 			--build-arg VCS_URL=$(shell git config --get remote.origin.url) \
 			--build-arg VERSION=$(VERSION) \
 			-t $(REPO):linux-$@-$(TAG) .
+
+base:
+	@docker build -f Dockerfile.compile -t $(BUILD_BASE) .
 
 push:
 	@docker login -u $(DOCKER_USER) -p $(DOCKER_PASS)

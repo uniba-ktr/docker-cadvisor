@@ -1,79 +1,78 @@
 version: 2
 jobs:
-  update:
-    machine: true
+  compile:
+    working_directory: ~/docker-cadvisor
+    machine:
+      docker_layer_caching: true
     steps:
-      - run: echo "Updating Docker engine to have multi-stage builds"
-      - run: sudo service docker stop
-      - run: curl -fsSL https://get.docker.com/ | sudo sh
-      - run: docker version
+      - checkout
+      - run: make BUILD_BASE=base
   build_amd64:
     working_directory: ~/docker-cadvisor
     machine: true
     steps:
       - checkout
-      - run: make ARCHITECTURES=amd64
-      - run: make ARCHITECTURES=amd64 push
+      - run: make BUILD_BASE=base ARCHITECTURES=amd64
+      - run: make BUILD_BASE=base ARCHITECTURES=amd64 push
   build_i386:
-    working_directory: ~/docker-gogs
+    working_directory: ~/docker-cadvisor
     machine: true
     steps:
       - checkout
-      - run: make ARCHITECTURES=i386
-      - run: make ARCHITECTURES=i386 push
+      - run: make BUILD_BASE=base ARCHITECTURES=i386
+      - run: make BUILD_BASE=base ARCHITECTURES=i386 push
   build_arm32v7:
     working_directory: ~/docker-cadvisor
     machine: true
     steps:
       - checkout
-      - run: make ARCHITECTURES=arm32v7
-      - run: make ARCHITECTURES=arm32v7 push
+      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7
+      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7 push
   build_arm64v8:
     working_directory: ~/docker-cadvisor
     machine: true
     steps:
       - checkout
-      - run: make ARCHITECTURES=arm64v8
-      - run: make ARCHITECTURES=arm64v8 push
+      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8
+      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8 push
   manifest:
     machine: true
     steps:
       - checkout
       - run: make manifest
-  #badge:
-  #  machine: true
-  #  steps:
-  #    - run: curl -X POST https://hooks.microbadger.com/images/whatever4711/gitea/2oxGzMVZlKSBC9xolckllXvTm4E=
+  badge:
+    machine: true
+    steps:
+      - run: curl -X POST https://hooks.microbadger.com/images/unibaktr/cadvisor/Fip_9kcTN5C9Fp0aDrXhhOlpX0Y=
 
 workflows:
   version: 2
   build-and-deploy:
-    jobs:
-      - update:
-          filters:
-            tags:
-              only: /.*/
+      - build_compile:
+        filters:
+          tags:
+            only: /.*/
       - build_amd64:
           requires:
-            - update
+            - build_compile
           filters:
             tags:
               only: /.*/
       - build_i386:
           requires:
-            - build_amd64
+            - build_compile
           filters:
             tags:
               only: /.*/
       - build_arm32v7:
           requires:
-            - build_amd64
+            - build_compile
           filters:
             tags:
               only: /.*/
       - build_arm64v8:
           requires:
-            - build_amd64
+            - build_compile
           filters:
             tags:
               only: /.*/
@@ -86,9 +85,9 @@ workflows:
           filters:
             tags:
               only: /.*/
-      #- badge:
-      #    requires:
-      #      - manifest
-      #    filters:
-      #      tags:
-      #        only: /.*/
+      - badge:
+          requires:
+            - manifest
+          filters:
+            tags:
+              only: /.*/
