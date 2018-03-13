@@ -50,9 +50,9 @@ workflows:
   version: 2
   build-and-deploy:
       - compile:
-        filters:
-          tags:
-            only: /.*/
+          filters:
+            tags:
+              only: /.*/
       - build_amd64:
           requires:
             - compile
