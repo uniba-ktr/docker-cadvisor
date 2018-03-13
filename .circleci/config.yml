@@ -2,9 +2,9 @@ version: 2
 jobs:
   compile_go:
     working_directory: ~/docker-cadvisor
-    machine:
-      image: circleci/classic:201711-01
-      docker_layer_caching: true
+    machine: true
+#      image: circleci/classic:201711-01
+#      docker_layer_caching: true
     steps:
       - checkout
       - run: make BUILD_BASE=base
