@@ -2,7 +2,7 @@ version: 2
 jobs:
   compile:
     working_directory: ~/docker-cadvisor
-    machine: true
+    machine:
       docker_layer_caching: true
     steps:
       - checkout
@@ -48,31 +48,31 @@ jobs:
 workflows:
   version: 2
   build-and-deploy:
-      - build_compile:
+      - compile:
         filters:
           tags:
             only: /.*/
       - build_amd64:
           requires:
-            - build_compile
+            - compile
           filters:
             tags:
               only: /.*/
       - build_i386:
           requires:
-            - build_compile
+            - compile
           filters:
             tags:
               only: /.*/
       - build_arm32v7:
           requires:
-            - build_compile
+            - compile
           filters:
             tags:
               only: /.*/
       - build_arm64v8:
           requires:
-            - build_compile
+            - compile
           filters:
             tags:
               only: /.*/
