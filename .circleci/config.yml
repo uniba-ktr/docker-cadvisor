@@ -2,8 +2,8 @@ version: 2
 jobs:
   compile:
     working_directory: ~/docker-cadvisor
-    machine:
-      docker_layer_caching: true
+    machine: true
+    docker_layer_caching: true
     steps:
       - checkout
       - run: make BUILD_BASE=base
