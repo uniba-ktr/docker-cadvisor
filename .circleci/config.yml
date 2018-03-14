@@ -12,7 +12,7 @@ jobs:
             mkdir -p docker-cache
             docker save -o docker-cache/base.tar base
       - save_cache:
-          key: *docker_cache_key
+          key: compiled
           paths:
             - docker-cache
   build_amd64:
@@ -20,7 +20,9 @@ jobs:
     machine: true
     steps:
       - checkout
-      - *restore_docker_cache
+      - restore_cache:
+          keys:
+            - compiled
       - run:
           name: Load cache and build image
           command: |
