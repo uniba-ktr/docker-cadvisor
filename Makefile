@@ -33,7 +33,9 @@ $(ARCHITECTURES):
 			-t $(REPO):linux-$@-$(TAG) .
 
 base:
-	@docker build -f Dockerfile.compile -t $(BUILD_BASE) .
+	@docker build \
+			--build-arg VERSION=release-$(VERSION) \
+			-f Dockerfile.compile -t $(BUILD_BASE) .
 
 push:
 	@docker login -u $(DOCKER_USER) -p $(DOCKER_PASS)
