@@ -2,49 +2,64 @@ version: 2
 jobs:
   compile_go:
     working_directory: ~/docker-cadvisor
-    machine:
-      image: circleci/classic:201711-01
-      docker_layer_caching: true
+    machine: true
     steps:
       - checkout
-      - run: make BUILD_BASE=base base
+      - run:
+          name: Do the compile steps
+          command: |
+            make BUILD_BASE=base base
+            mkdir -p docker-cache
+            docker save -o docker-cache/base.tar base
+      - save_cache:
+          key: *docker_cache_key
+          paths:
+            - docker-cache
   build_amd64:
     working_directory: ~/docker-cadvisor
     machine: true
     steps:
       - checkout
-      - run: make BUILD_BASE=base ARCHITECTURES=amd64
-      - run: make BUILD_BASE=base ARCHITECTURES=amd64 push
-  build_i386:
-    working_directory: ~/docker-cadvisor
-    machine: true
-    steps:
-      - checkout
-      - run: make BUILD_BASE=base ARCHITECTURES=i386
-      - run: make BUILD_BASE=base ARCHITECTURES=i386 push
-  build_arm32v7:
-    working_directory: ~/docker-cadvisor
-    machine: true
-    steps:
-      - checkout
-      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7
-      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7 push
-  build_arm64v8:
-    working_directory: ~/docker-cadvisor
-    machine: true
-    steps:
-      - checkout
-      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8
-      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8 push
-  manifest:
-    machine: true
-    steps:
-      - checkout
-      - run: make manifest
-  badge:
-    machine: true
-    steps:
-      - run: curl -X POST https://hooks.microbadger.com/images/unibaktr/cadvisor/Fip_9kcTN5C9Fp0aDrXhhOlpX0Y=
+      - *restore_docker_cache
+      - run:
+          name: Load cache and build image
+          command: |
+            docker load < docker-cache/base.tar
+            make BUILD_BASE=base ARCHITECTURES=amd64
+      - run:
+          name: Push image to dockerhub
+          command: |
+            make BUILD_BASE=base ARCHITECTURES=amd64 push
+#  build_i386:
+#    working_directory: ~/docker-cadvisor
+#    machine: true
+#    steps:
+#      - checkout
+#      - run: make BUILD_BASE=base ARCHITECTURES=i386
+#      - run: make BUILD_BASE=base ARCHITECTURES=i386 push
+#  build_arm32v7:
+#    working_directory: ~/docker-cadvisor
+#    machine: true
+#    steps:
+#      - checkout
+#      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7
+#      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7 push
+#  build_arm64v8:
+#    working_directory: ~/docker-cadvisor
+#    machine: true
+#    steps:
+#      - checkout
+#      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8
+#      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8 push
+#  manifest:
+#    machine: true
+#    steps:
+#      - checkout
+#      - run: make manifest
+#  badge:
+#    machine: true
+#    steps:
+#      - run: curl -X POST https://hooks.microbadger.com/images/unibaktr/cadvisor/Fip_9kcTN5C9Fp0aDrXhhOlpX0Y=
 
 workflows:
   version: 2
@@ -60,36 +75,37 @@ workflows:
           filters:
             tags:
               only: /.*/
-      - build_i386:
-          requires:
-            - compile_go
-          filters:
-            tags:
-              only: /.*/
-      - build_arm32v7:
-          requires:
-            - compile_go
-          filters:
-            tags:
-              only: /.*/
-      - build_arm64v8:
-          requires:
-            - compile_go
-          filters:
-            tags:
-              only: /.*/
-      - manifest:
-          requires:
-            - build_amd64
-            - build_i386
-            - build_arm32v7
-            - build_arm64v8
-          filters:
-            tags:
-              only: /.*/
-      - badge:
-          requires:
-            - manifest
-          filters:
-            tags:
-              only: /.*/
+#      - build_i386:
+#          requires:
+#            - compile_go
+#          filters:
+#            tags:
+#              only: /.*/
+#      - build_arm32v7:
+#          requires:
+#            - compile_go
+#          filters:
+#            tags:
+#              only: /.*/
+#      - build_arm64v8:
+#          requires:
+#            - compile_go
+#          filters:
+#            tags:
+#              only: /.*/
+#      - manifest:
+#          requires:
+#            - build_amd64
+#            - build_i386
+#            - build_arm32v7
+#            - build_arm64v8
+#          filters:
+#            tags:
+#              only: /.*/
+#      - badge:
+#          requires:
+#            - manifest
+#          filters:
+#            tags:
+#              only: /.*/
+#
