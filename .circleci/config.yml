@@ -53,6 +53,18 @@ jobs:
       - run:
           name: Push image for i386 to dockerhub
           command: make BUILD_BASE=base ARCHITECTURES=i386 push
+  build_arm32v5:
+    <<: *defaults
+    steps:
+      - checkout
+      - *restore_docker_cache
+      - *load_image_from_cache
+      - run:
+          name: Build image for arm32v5
+          command: make BUILD_BASE=base ARCHITECTURES=arm32v5
+      - run:
+          name: Push image for arm32v7 to dockerhub
+          command: make BUILD_BASE=base ARCHITECTURES=arm32v5 push
   build_arm32v7:
     <<: *defaults
     steps:
@@ -91,50 +103,46 @@ jobs:
           name: Call microbadger's webhook
           command: curl -X POST https://hooks.microbadger.com/images/unibaktr/cadvisor/Fip_9kcTN5C9Fp0aDrXhhOlpX0Y=
 
+tag_filter: @tag_filter
+  filters:
+    tags:
+      only: /.*/
+
 workflows:
   version: 2
   compile-build-and-deploy:
     jobs:
       - compile_go:
-          filters:
-            tags:
-              only: /.*/
+          <<: *tag_filter
       - build_amd64:
           requires:
             - compile_go
-          filters:
-            tags:
-              only: /.*/
+          <<: *tag_filter
       - build_i386:
           requires:
             - compile_go
-          filters:
-            tags:
-              only: /.*/
+          <<: *tag_filter
+      - build_arm32v5:
+          requires:
+            - compile_go
+          <<: *tag_filter
       - build_arm32v7:
           requires:
             - compile_go
-          filters:
-            tags:
-              only: /.*/
+          <<: *tag_filter
       - build_arm64v8:
           requires:
             - compile_go
-          filters:
-            tags:
-              only: /.*/
+          <<: *tag_filter
       - manifest:
           requires:
             - build_amd64
             - build_i386
+            - build_arm32v5
             - build_arm32v7
             - build_arm64v8
-          filters:
-            tags:
-              only: /.*/
+          <<: *tag_filter
       - badge:
           requires:
             - manifest
-          filters:
-            tags:
-              only: /.*/
+          <<: *tag_filter
