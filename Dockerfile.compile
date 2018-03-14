@@ -1,7 +1,7 @@
 FROM karalabe/xgo-latest AS build
 ARG VERSION=master
 
-RUN xgo --branch={VERSION} --targets=linux/386,linux/amd64,linux/arm-5,linux/arm-6,linux/arm-7,linux/arm64 github.com/google/cadvisor
+RUN xgo --branch=${VERSION} --targets=linux/386,linux/amd64,linux/arm-5,linux/arm-6,linux/arm-7,linux/arm64 github.com/google/cadvisor
 
 FROM alpine
 
