@@ -109,6 +109,11 @@ tag_filter: &tag_filter
     tags:
       only: /.*/
 
+requires_compile_and_tag: &requires_compile_and_tag
+  requires:
+    - compile_go
+  <<: *tag_filter
+
 workflows:
   version: 2
   compile-build-and-deploy:
@@ -116,25 +121,15 @@ workflows:
       - compile_go:
           <<: *tag_filter
       - build_amd64:
-          requires:
-            - compile_go
-          <<: *tag_filter
+          <<: *requires_compile_and_tag
       - build_i386:
-          requires:
-            - compile_go
-          <<: *tag_filter
+          <<: *requires_compile_and_tag
       - build_arm32v5:
-          requires:
-            - compile_go
-          <<: *tag_filter
+          <<: *requires_compile_and_tag
       - build_arm32v7:
-          requires:
-            - compile_go
-          <<: *tag_filter
+          <<: *requires_compile_and_tag
       - build_arm64v8:
-          requires:
-            - compile_go
-          <<: *tag_filter
+          <<: *requires_compile_and_tag
       - manifest:
           requires:
             - build_amd64
