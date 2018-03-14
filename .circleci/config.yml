@@ -17,11 +17,6 @@ load_image_from_cache: &load_image_from_cache
     name: Load docker image from cache
     command: docker load < docker-cache/base.tar
 
-tag_filter: @tag_filter
-  filters:
-    tags:
-      only: /.*/
-
 jobs:
   compile_go:
     <<: *defaults
@@ -107,6 +102,12 @@ jobs:
       - run:
           name: Call microbadger's webhook
           command: curl -X POST https://hooks.microbadger.com/images/unibaktr/cadvisor/Fip_9kcTN5C9Fp0aDrXhhOlpX0Y=
+
+
+tag_filter: &tag_filter
+  filters:
+    tags:
+      only: /.*/
 
 workflows:
   version: 2
