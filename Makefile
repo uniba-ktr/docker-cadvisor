@@ -34,7 +34,7 @@ $(ARCHITECTURES):
 
 base:
 	@docker build \
-			--build-arg VERSION=release-$(VERSION) \
+			--build-arg VERSION=$(VERSION) \
 			-f Dockerfile.compile -t $(BUILD_BASE) .
 
 push:
