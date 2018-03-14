@@ -62,7 +62,7 @@ jobs:
       - *load_image_from_cache
       - run:
           name: Build image for arm32v7
-           command: make BUILD_BASE=base ARCHITECTURES=arm32v7
+          command: make BUILD_BASE=base ARCHITECTURES=arm32v7
       - run:
           name: Push image for arm32v7 to dockerhub
           command: make BUILD_BASE=base ARCHITECTURES=arm32v7 push
