@@ -18,6 +18,11 @@ load_image_from_cache: &load_image_from_cache
     command:
       docker load < docker-cache/base.tar
 
+workflow_filter: &workflow_filter
+  filters:
+    tags:
+      only: /.*/
+
 jobs:
   compile_go:
     <<: *defaults
@@ -44,82 +49,70 @@ jobs:
           name: Push image to dockerhub
           command: |
             make BUILD_BASE=base ARCHITECTURES=amd64 push
-#  build_i386:
-#    working_directory: ~/docker-cadvisor
-#    machine: true
-#    steps:
-#      - checkout
-#      - run: make BUILD_BASE=base ARCHITECTURES=i386
-#      - run: make BUILD_BASE=base ARCHITECTURES=i386 push
-#  build_arm32v7:
-#    working_directory: ~/docker-cadvisor
-#    machine: true
-#    steps:
-#      - checkout
-#      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7
-#      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7 push
-#  build_arm64v8:
-#    working_directory: ~/docker-cadvisor
-#    machine: true
-#    steps:
-#      - checkout
-#      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8
-#      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8 push
-#  manifest:
-#    machine: true
-#    steps:
-#      - checkout
-#      - run: make manifest
-#  badge:
-#    machine: true
-#    steps:
-#      - run: curl -X POST https://hooks.microbadger.com/images/unibaktr/cadvisor/Fip_9kcTN5C9Fp0aDrXhhOlpX0Y=
+  build_i386:
+    <<: *defaults
+    steps:
+      - checkout
+      - *restore_docker_cache
+      - *load_image_from_cache
+      - run: make BUILD_BASE=base ARCHITECTURES=i386
+      - run: make BUILD_BASE=base ARCHITECTURES=i386 push
+  build_arm32v7:
+    <<: *defaults
+    steps:
+      - checkout
+      - *restore_docker_cache
+      - *load_image_from_cache
+      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7
+      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7 push
+  build_arm64v8:
+      <<: *defaults
+      steps:
+        - checkout
+        - *restore_docker_cache
+        - *load_image_from_cache
+      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8
+      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8 push
+  manifest:
+    <<: *defaults
+    steps:
+      - checkout
+      - run: make manifest
+  badge:
+    <<: *defaults
+    steps:
+      - run: curl -X POST https://hooks.microbadger.com/images/unibaktr/cadvisor/Fip_9kcTN5C9Fp0aDrXhhOlpX0Y=
 
 workflows:
   version: 2
   compile-build-and-deploy:
     jobs:
       - compile_go:
-          filters:
-            tags:
-              only: /.*/
+          *workflow_filter
       - build_amd64:
           requires:
             - compile_go
-          filters:
-            tags:
-              only: /.*/
-#      - build_i386:
-#          requires:
-#            - compile_go
-#          filters:
-#            tags:
-#              only: /.*/
-#      - build_arm32v7:
-#          requires:
-#            - compile_go
-#          filters:
-#            tags:
-#              only: /.*/
-#      - build_arm64v8:
-#          requires:
-#            - compile_go
-#          filters:
-#            tags:
-#              only: /.*/
-#      - manifest:
-#          requires:
-#            - build_amd64
-#            - build_i386
-#            - build_arm32v7
-#            - build_arm64v8
-#          filters:
-#            tags:
-#              only: /.*/
-#      - badge:
-#          requires:
-#            - manifest
-#          filters:
-#            tags:
-#              only: /.*/
-#
+          *workflow_filter
+      - build_i386:
+          requires:
+            - compile_go
+          *workflow_filter
+      - build_arm32v7:
+          requires:
+            - compile_go
+          *workflow_filter
+      - build_arm64v8:
+          requires:
+            - compile_go
+          *workflow_filter
+      - manifest:
+          requires:
+            - build_amd64
+            - build_i386
+            - build_arm32v7
+            - build_arm64v8
+          *workflow_filter
+      - badge:
+          requires:
+            - manifest
+          *workflow_filter
