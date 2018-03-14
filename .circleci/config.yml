@@ -1,8 +1,26 @@
 version: 2
+defaults: &defaults
+  working_directory: ~/docker-cadvisor
+  machine: true
+
+save_docker_cache: &save_docker_cache
+  - save_cache:
+      key: compiled
+      paths: docker-cache
+
+restore_docker_cache: &restore_docker_cache
+  - restore_cache:
+      key: compiled
+
+load_image_from_cache: &load_image_from_cache
+  - run:
+      name: Load docker image from cache
+      command:
+        docker load < docker-cache/base.tar
+
 jobs:
   compile_go:
-    working_directory: ~/docker-cadvisor
-    machine: true
+    <<: *defaults
     steps:
       - checkout
       - run:
@@ -11,22 +29,16 @@ jobs:
             make BUILD_BASE=base base
             mkdir -p docker-cache
             docker save -o docker-cache/base.tar base
-      - save_cache:
-          key: compiled
-          paths:
-            - docker-cache
+      - *save_docker_cache
   build_amd64:
-    working_directory: ~/docker-cadvisor
-    machine: true
+    <<: *defaults
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - compiled
+      - *restore_docker_cache
+      - *load_image_from_cache
       - run:
-          name: Load cache and build image
+          name: Build image
           command: |
-            docker load < docker-cache/base.tar
             make BUILD_BASE=base ARCHITECTURES=amd64
       - run:
           name: Push image to dockerhub
