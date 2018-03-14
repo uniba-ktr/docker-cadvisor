@@ -72,12 +72,12 @@ jobs:
         - checkout
         - *restore_docker_cache
         - *load_image_from_cache
-      - run:
-          name: Build image for arm64v8
-          command: make BUILD_BASE=base ARCHITECTURES=arm64v8
-      - run:
-          name: Push image for arm64v8 to dockerhub
-          command: make BUILD_BASE=base ARCHITECTURES=arm64v8 push
+        - run:
+            name: Build image for arm64v8
+            command: make BUILD_BASE=base ARCHITECTURES=arm64v8
+        - run:
+            name: Push image for arm64v8 to dockerhub
+            command: make BUILD_BASE=base ARCHITECTURES=arm64v8 push
   manifest:
     <<: *defaults
     steps:
