@@ -4,19 +4,19 @@ defaults: &defaults
   machine: true
 
 save_docker_cache: &save_docker_cache
-  - save_cache:
-      key: compiled
-      paths: docker-cache
+  save_cache:
+    key: compiled
+    paths: docker-cache
 
 restore_docker_cache: &restore_docker_cache
-  - restore_cache:
-      key: compiled
+  restore_cache:
+    key: compiled
 
 load_image_from_cache: &load_image_from_cache
-  - run:
-      name: Load docker image from cache
-      command:
-        docker load < docker-cache/base.tar
+  run:
+    name: Load docker image from cache
+    command:
+      docker load < docker-cache/base.tar
 
 jobs:
   compile_go:
