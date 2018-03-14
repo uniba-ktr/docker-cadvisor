@@ -18,11 +18,6 @@ load_image_from_cache: &load_image_from_cache
     command:
       docker load < docker-cache/base.tar
 
-workflow_filter: &workflow_filter
-  filters:
-    tags:
-      only: /.*/
-
 jobs:
   compile_go:
     <<: *defaults
@@ -42,77 +37,105 @@ jobs:
       - *restore_docker_cache
       - *load_image_from_cache
       - run:
-          name: Build image
-          command: |
-            make BUILD_BASE=base ARCHITECTURES=amd64
+          name: Build image for amd64
+          command: make BUILD_BASE=base ARCHITECTURES=amd64
       - run:
-          name: Push image to dockerhub
-          command: |
-            make BUILD_BASE=base ARCHITECTURES=amd64 push
+          name: Push image for amd64 to dockerhub
+          command: make BUILD_BASE=base ARCHITECTURES=amd64 push
   build_i386:
     <<: *defaults
     steps:
       - checkout
       - *restore_docker_cache
       - *load_image_from_cache
-      - run: make BUILD_BASE=base ARCHITECTURES=i386
-      - run: make BUILD_BASE=base ARCHITECTURES=i386 push
+      - run:
+          name: Build image for i386
+          command: make BUILD_BASE=base ARCHITECTURES=i386
+      - run:
+          name: Push image for i386 to dockerhub
+          command: make BUILD_BASE=base ARCHITECTURES=i386 push
   build_arm32v7:
     <<: *defaults
     steps:
       - checkout
       - *restore_docker_cache
       - *load_image_from_cache
-      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7
-      - run: make BUILD_BASE=base ARCHITECTURES=arm32v7 push
+      - run:
+          name: Build image for arm32v7
+           command: make BUILD_BASE=base ARCHITECTURES=arm32v7
+      - run:
+          name: Push image for arm32v7 to dockerhub
+          command: make BUILD_BASE=base ARCHITECTURES=arm32v7 push
   build_arm64v8:
       <<: *defaults
       steps:
         - checkout
         - *restore_docker_cache
         - *load_image_from_cache
-      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8
-      - run: make BUILD_BASE=base ARCHITECTURES=arm64v8 push
+      - run:
+          name: Build image for arm64v8
+          command: make BUILD_BASE=base ARCHITECTURES=arm64v8
+      - run:
+          name: Push image for arm64v8 to dockerhub
+          command: make BUILD_BASE=base ARCHITECTURES=arm64v8 push
   manifest:
     <<: *defaults
     steps:
       - checkout
-      - run: make manifest
+      - run:
+          name: Generate multiarch manifest and push to dockerhub
+          command: make manifest
   badge:
     <<: *defaults
     steps:
-      - run: curl -X POST https://hooks.microbadger.com/images/unibaktr/cadvisor/Fip_9kcTN5C9Fp0aDrXhhOlpX0Y=
+      - run:
+          name: Call microbadger's webhook
+          command: curl -X POST https://hooks.microbadger.com/images/unibaktr/cadvisor/Fip_9kcTN5C9Fp0aDrXhhOlpX0Y=
 
 workflows:
   version: 2
   compile-build-and-deploy:
     jobs:
       - compile_go:
-          *workflow_filter
+          filters:
+            tags:
+              only: /.*/
       - build_amd64:
           requires:
             - compile_go
-          *workflow_filter
+          filters:
+            tags:
+              only: /.*/
       - build_i386:
           requires:
             - compile_go
-          *workflow_filter
+          filters:
+            tags:
+              only: /.*/
       - build_arm32v7:
           requires:
             - compile_go
-          *workflow_filter
+          filters:
+            tags:
+              only: /.*/
       - build_arm64v8:
           requires:
             - compile_go
-          *workflow_filter
+          filters:
+            tags:
+              only: /.*/
       - manifest:
           requires:
             - build_amd64
             - build_i386
             - build_arm32v7
             - build_arm64v8
-          *workflow_filter
+          filters:
+            tags:
+              only: /.*/
       - badge:
           requires:
             - manifest
-          *workflow_filter
+          filters:
+            tags:
+              only: /.*/
