@@ -5,12 +5,12 @@ defaults: &defaults
 
 save_docker_cache: &save_docker_cache
   save_cache:
-    key: compiled
+    key: compiled-{{ .Revision }}
     paths: docker-cache
 
 restore_docker_cache: &restore_docker_cache
   restore_cache:
-    key: compiled
+    key: compiled-{{ .Revision }}
 
 load_image_from_cache: &load_image_from_cache
   run:
