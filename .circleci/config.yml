@@ -15,8 +15,7 @@ restore_docker_cache: &restore_docker_cache
 load_image_from_cache: &load_image_from_cache
   run:
     name: Load docker image from cache
-    command:
-      docker load < docker-cache/base.tar
+    command: docker load < docker-cache/base.tar
 
 jobs:
   compile_go:
