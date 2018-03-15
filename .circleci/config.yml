@@ -38,7 +38,7 @@ jobs:
       - run:
           name: Build image for amd64
           command: make BUILD_BASE=base ARCHITECTURES=amd64
-      - test:
+      - run:
           name: Test image for amd64
           command: make ARCHITECTURES=amd64 test
       - deploy:
