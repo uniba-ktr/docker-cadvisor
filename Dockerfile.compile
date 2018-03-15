@@ -1,9 +1,9 @@
 FROM karalabe/xgo-latest AS build
 ARG VERSION=master
 
-WORKDIR ${GOPATH}/src
+WORKDIR ${GOPATH}/src/github.com/google
 RUN git clone --branch ${VERSION} https://github.com/google/cadvisor.git
-WORKDIR ${GOPATH}/src/cadvisor
+WORKDIR ${GOPATH}/src/github.com/google/cadvisor
 RUN xgo --targets=linux/386,linux/amd64,linux/arm-5,linux/arm-6,linux/arm-7,linux/arm64 .
 
 FROM alpine

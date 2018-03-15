@@ -52,6 +52,21 @@ manifest:
 	@./docker logout
 	@rm -f docker
 
+test:
+	@$(foreach arch,$(ARCHITECTURES), docker run \
+			--volume=/:/rootfs:ro \
+			--volume=/var/run:/var/run:rw \
+			--volume=/sys:/sys:ro \
+			--volume=/var/lib/docker/:/var/lib/docker:ro \
+			--volume=/dev/disk/:/dev/disk:ro \
+			--publish=8080:8080 \
+			--detach=true \
+			--name=cadvisor \
+			$(REPO):linux-$(arch)-$(TAG); \
+			sleep 10; \
+			curl -sSL --retry 10 --retry-delay 5 localhost:8080 | grep cAdvisor; \
+			docker rm -f cadvisor;)
+
 # Needed convertions for different architecture naming schemes
 # Convert qemu archs to naming scheme of https://github.com/multiarch/qemu-user-static/releases
 define qemuarch
