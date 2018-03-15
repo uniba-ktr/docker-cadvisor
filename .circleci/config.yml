@@ -38,9 +38,12 @@ jobs:
       - run:
           name: Build image for amd64
           command: make BUILD_BASE=base ARCHITECTURES=amd64
-      - run:
+      - test:
+          name: Test image for amd64
+          command: make ARCHITECTURES=amd64 test
+      - deploy:
           name: Push image for amd64 to dockerhub
-          command: make BUILD_BASE=base ARCHITECTURES=amd64 push
+          command: make ARCHITECTURES=amd64 push
   build_i386:
     <<: *defaults
     steps:
