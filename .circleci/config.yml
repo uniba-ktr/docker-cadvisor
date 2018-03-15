@@ -54,8 +54,11 @@ jobs:
           name: Build image for i386
           command: make BUILD_BASE=base ARCHITECTURES=i386
       - run:
+          name: Test image for i386
+          command: make ARCHITECTURES=i386 test
+      - deploy:
           name: Push image for i386 to dockerhub
-          command: make BUILD_BASE=base ARCHITECTURES=i386 push
+          command: make ARCHITECTURES=i386 push
   build_arm32v5:
     <<: *defaults
     steps:
@@ -66,8 +69,11 @@ jobs:
           name: Build image for arm32v5
           command: make BUILD_BASE=base ARCHITECTURES=arm32v5
       - run:
-          name: Push image for arm32v7 to dockerhub
-          command: make BUILD_BASE=base ARCHITECTURES=arm32v5 push
+          name: Test image for arm32v5
+          command: make ARCHITECTURES=arm32v5 test
+      - deploy:
+          name: Push image for arm32v5 to dockerhub
+          command: make ARCHITECTURES=arm32v5 push
   build_arm32v7:
     <<: *defaults
     steps:
@@ -78,8 +84,11 @@ jobs:
           name: Build image for arm32v7
           command: make BUILD_BASE=base ARCHITECTURES=arm32v7
       - run:
+          name: Test image for arm32v7
+          command: make ARCHITECTURES=arm32v7 test
+      - deploy:
           name: Push image for arm32v7 to dockerhub
-          command: make BUILD_BASE=base ARCHITECTURES=arm32v7 push
+          command: make ARCHITECTURES=arm32v7 push
   build_arm64v8:
       <<: *defaults
       steps:
@@ -90,13 +99,16 @@ jobs:
             name: Build image for arm64v8
             command: make BUILD_BASE=base ARCHITECTURES=arm64v8
         - run:
+            name: Test image for arm64v8
+            command: make ARCHITECTURES=arm64v8 test
+        - deploy:
             name: Push image for arm64v8 to dockerhub
-            command: make BUILD_BASE=base ARCHITECTURES=arm64v8 push
+            command: make ARCHITECTURES=arm64v8 push
   manifest:
     <<: *defaults
     steps:
       - checkout
-      - run:
+      - deploy:
           name: Generate multiarch manifest and push to dockerhub
           command: make manifest
   badge:
