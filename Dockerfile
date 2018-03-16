@@ -4,8 +4,8 @@ ARG BUILD_BASE=karalabe/xgo-latest
 # first image to download qemu and make it executable
 FROM ${BUILD_BASE} AS qemu
 ARG QEMU=x86_64
-ARG VERSION=1.3.3
-ADD https://github.com/multiarch/qemu-user-static/releases/download/v2.11.0/qemu-${QEMU}-static /qemu-${QEMU}-static
+ARG QEMU_VERSION=v2.11.0
+ADD https://github.com/multiarch/qemu-user-static/releases/download/${QEMU_VERSION}/qemu-${QEMU}-static /qemu-${QEMU}-static
 RUN chmod +x /qemu-${QEMU}-static
 RUN if [ ! -d "/build" ]; then xgo --targets=linux/386,linux/amd64,linux/arm-5,linux/arm-6,linux/arm-7,linux/arm64 github.com/google/cadvisor; fi
 
@@ -15,7 +15,7 @@ ARG QEMU=x86_64
 COPY --from=qemu /qemu-${QEMU}-static /usr/bin/qemu-${QEMU}-static
 ARG ARCH=amd64
 ARG CADVISOR_ARCH=amd64
-ARG VERSION=1.3.3
+ARG VERSION=master
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VCS_URL
