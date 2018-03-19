@@ -48,13 +48,17 @@ manifest:
 	@wget -O docker https://6582-88013053-gh.circle-artifacts.com/1/work/build/docker-linux-amd64
 	@chmod +x docker
 	@./docker login -u $(DOCKER_USER) -p $(DOCKER_PASS)
-	@./docker manifest create $(REPO):$(TAG) $(foreach arch,$(ARCHITECTURES), $(REPO):linux-$(arch)-$(TAG)) --amend
-	@$(foreach arch,$(ARCHITECTURES), ./docker manifest annotate $(REPO):$(TAG) $(REPO):linux-$(arch)-$(TAG) --os linux $(strip $(call convert_variants,$(arch)));)
+	@./docker manifest create $(REPO):$(TAG) \
+			$(foreach arch,$(ARCHITECTURES), $(REPO):linux-$(arch)-$(TAG)) --amend
+	@$(foreach arch,$(ARCHITECTURES), ./docker manifest annotate \
+			$(REPO):$(TAG) $(REPO):linux-$(arch)-$(TAG) \
+			--os linux $(strip $(call convert_variants,$(arch)));)
 	@./docker manifest push $(REPO):$(TAG)
 	@./docker logout
 	@rm -f docker
 
 test:
+	@docker network create -d bridge trial
 	@$(foreach arch,$(ARCHITECTURES), docker run \
 			--volume=/:/rootfs:ro \
 			--volume=/var/run:/var/run:rw \
@@ -66,8 +70,12 @@ test:
 			--name=cadvisor \
 			$(REPO):linux-$(arch)-$(TAG); \
 			sleep 10; \
+			docker run --network trial \
+				jwilder/dockerize dockerize -wait tcp://cadvisor:8080 -timeout 300s; \
 			curl -sSL --retry 10 --retry-delay 5 localhost:8080 | grep cAdvisor; \
 			docker rm -f cadvisor;)
+	@docker network rm trial
+
 
 # Needed convertions for different architecture naming schemes
 # Convert qemu archs to naming scheme of https://github.com/multiarch/qemu-user-static/releases
