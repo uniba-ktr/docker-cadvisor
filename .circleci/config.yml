@@ -25,7 +25,7 @@ jobs:
       - run:
           name: Do the compile steps
           command: |
-            make BUILD_BASE=base base
+            make base
             mkdir -p docker-cache
             docker save -o docker-cache/base.tar base
       - *save_docker_cache
@@ -37,7 +37,7 @@ jobs:
       - *load_image_from_cache
       - run:
           name: Build image for amd64
-          command: make BUILD_BASE=base ARCHITECTURES=amd64
+          command: make ARCHITECTURES=amd64
       - run:
           name: Test image for amd64
           command: make ARCHITECTURES=amd64 test
@@ -52,7 +52,7 @@ jobs:
       - *load_image_from_cache
       - run:
           name: Build image for i386
-          command: make BUILD_BASE=base ARCHITECTURES=i386
+          command: make ARCHITECTURES=i386
       - run:
           name: Test image for i386
           command: make ARCHITECTURES=i386 test
@@ -67,7 +67,7 @@ jobs:
       - *load_image_from_cache
       - run:
           name: Build image for arm32v5
-          command: make BUILD_BASE=base ARCHITECTURES=arm32v5
+          command: make ARCHITECTURES=arm32v5
       - run:
           name: Test image for arm32v5
           command: make ARCHITECTURES=arm32v5 test
@@ -82,7 +82,7 @@ jobs:
       - *load_image_from_cache
       - run:
           name: Build image for arm32v7
-          command: make BUILD_BASE=base ARCHITECTURES=arm32v7
+          command: make ARCHITECTURES=arm32v7
       - run:
           name: Test image for arm32v7
           command: make ARCHITECTURES=arm32v7 test
@@ -97,7 +97,7 @@ jobs:
         - *load_image_from_cache
         - run:
             name: Build image for arm64v8
-            command: make BUILD_BASE=base ARCHITECTURES=arm64v8
+            command: make ARCHITECTURES=arm64v8
         - run:
             name: Test image for arm64v8
             command: make ARCHITECTURES=arm64v8 test
