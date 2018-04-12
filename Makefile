@@ -1,5 +1,6 @@
 ARCHITECTURES = amd64 i386 arm32v5 arm32v7 arm64v8
-IMAGE_TARGET = debian:stretch-slim
+IMAGE_TARGET = debian:buster-slim
+BUILD_BASE = base
 MULTIARCH = multiarch/qemu-user-static:register
 QEMU_VERSION = v2.11.0
 VERSION = $(shell cat VERSION)
@@ -7,9 +8,6 @@ VERSION = $(shell cat VERSION)
 #DOCKER_PASS = test
 ifeq ($(REPO),)
   REPO = cadvisor
-endif
-ifeq ($(BUILD_BASE),)
-  BUILD_BASE = karalabe/xgo-latest
 endif
 ifeq ($(CIRCLE_TAG),)
 	TAG = latest
@@ -19,10 +17,10 @@ endif
 
 all: $(ARCHITECTURES)
 
-$(ARCHITECTURES):
+$(ARCHITECTURES): base
 	@docker run --rm --privileged $(MULTIARCH) --reset
 	@docker build \
-			--build-arg BUILD_BASE=$(BUILD_BASE) \
+			--build-arg BUILD_BASE=$(BUILD_BASE):$(TAG) \
 			--build-arg IMAGE_TARGET=$@/$(IMAGE_TARGET) \
 			--build-arg QEMU=$(strip $(call qemuarch,$@)) \
 			--build-arg QEMU_VERSION=$(QEMU_VERSION) \
@@ -35,9 +33,15 @@ $(ARCHITECTURES):
 			-t $(REPO):linux-$@-$(TAG) .
 
 base:
-	@docker build \
-			--build-arg VERSION=$(VERSION) \
-			-f Dockerfile.compile -t $(BUILD_BASE) .
+	@ID=$$(docker images -q $(BUILD_BASE):$(TAG)) && \
+	if test "$$ID" = ""; then \
+	    echo "[x]    Building Base Image $(BUILD_BASE):$(TAG)"; \
+			docker build \
+					--build-arg VERSION=$(VERSION) \
+					-f Dockerfile.compile -t $(BUILD_BASE):$(TAG) .; \
+	else \
+			echo "[x]    Image $(BUILD_BASE):$(TAG) already exists"; \
+	fi
 
 push:
 	@docker login -u $(DOCKER_USER) -p $(DOCKER_PASS)

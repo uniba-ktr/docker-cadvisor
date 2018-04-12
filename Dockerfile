@@ -1,5 +1,5 @@
 ARG IMAGE_TARGET=debian:stretch-slim
-ARG BUILD_BASE=karalabe/xgo-latest
+ARG BUILD_BASE
 
 # first image to download qemu and make it executable
 FROM ${BUILD_BASE} AS qemu
@@ -7,7 +7,6 @@ ARG QEMU=x86_64
 ARG QEMU_VERSION=v2.11.0
 ADD https://github.com/multiarch/qemu-user-static/releases/download/${QEMU_VERSION}/qemu-${QEMU}-static /qemu-${QEMU}-static
 RUN chmod +x /qemu-${QEMU}-static
-RUN if [ ! -d "/build" ]; then xgo --targets=linux/386,linux/amd64,linux/arm-5,linux/arm-6,linux/arm-7,linux/arm64 github.com/google/cadvisor; fi
 
 # second image to be deployed on dockerhub
 FROM ${IMAGE_TARGET}
