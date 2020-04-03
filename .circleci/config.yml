@@ -76,7 +76,7 @@ commands:
 
 jobs:
   buildx:
-    working_directory: ~/docker-gitea
+    working_directory: ~/docker-cadvisor
     machine:
       image: ubuntu-1604:201903-01
     steps:
