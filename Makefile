@@ -1,6 +1,5 @@
 PLATFORMS = linux/amd64,linux/i386,linux/arm64,linux/arm/v7
 VERSION = $(shell cat VERSION)
-BINFMT = a7996909642ee92942dcd6cff44b9b95f08dad64
 builder = xbuilder
 
 comma := ,
