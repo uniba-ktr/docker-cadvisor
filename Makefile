@@ -1,8 +1,10 @@
 PLATFORMS = linux/amd64,linux/i386,linux/arm64,linux/arm/v7
 VERSION = $(shell cat VERSION)
 BINFMT = a7996909642ee92942dcd6cff44b9b95f08dad64
-#DOCKER_USER = test
-#DOCKER_PASS = test
+builder = xbuilder
+
+comma := ,
+
 ifeq ($(REPO),)
   REPO = cadvisor
 endif
@@ -12,14 +14,14 @@ else
 	TAG = $(CIRCLE_TAG)
 endif
 
-.PHONY: all init build clean
+.PHONY: all init build build_local clean
 
-all: init build clean
+all: init build_local clean
 
 init: clean
-	@docker run --rm --privileged docker/binfmt:$(BINFMT)
-	@docker buildx create --name cadvisor_builder
-	@docker buildx use cadvisor_builder
+	@docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+	@docker context create $(builder)
+	@docker buildx create --name $(builder) --name $(builder) --driver docker-container --use
 	@docker buildx inspect --bootstrap
 
 build:
@@ -29,10 +31,23 @@ build:
 			--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
 			--build-arg VCS_URL=$(shell git config --get remote.origin.url) \
 			--build-arg VERSION=$(VERSION) \
+			--progress plain \
 			--platform $(PLATFORMS) \
 			--push \
 			-t $(REPO):$(TAG) .
 	@docker logout
 
 clean:
-	@docker buildx rm cadvisor_builder | true
+	@docker buildx rm $(builder) | true
+	@docker context rm $(builder) | true
+
+# To test the "buildx" locally
+build_local:
+	@docker buildx build \
+			--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
+			--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
+			--build-arg VCS_URL=$(shell git config --get remote.origin.url) \
+			--build-arg VERSION=$(VERSION) \
+			--platform $(firstword $(subst $(comma), ,$(PLATFORMS))) \
+			--load \
+			-t $(REPO):$(TAG) .

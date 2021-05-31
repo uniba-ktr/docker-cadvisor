@@ -13,6 +13,7 @@ ARG VERSION=master
 ARG BUILD_DATE
 ARG VCS_REF
 ARG VCS_URL
+ARG TARGETPLATFORM
 
 # Without zfs for arm
 RUN apk --no-cache add libc6-compat device-mapper findutils && \
