@@ -1,10 +1,10 @@
 FROM golang as build
 ENV GOOS=linux
 ENV CGO_ENABLED=1
-ARG VERSION=v0.35.0
+ARG VERSION=0.35.0
 
 WORKDIR ${GOPATH}/src/github.com/google
-RUN git clone --branch ${VERSION} https://github.com/google/cadvisor.git
+RUN git clone --branch v${VERSION} https://github.com/google/cadvisor.git
 WORKDIR ${GOPATH}/src/github.com/google/cadvisor
 RUN make build
 
