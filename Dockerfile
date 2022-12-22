@@ -1,7 +1,7 @@
 FROM golang as build
 ENV GOOS=linux
 ENV CGO_ENABLED=1
-ARG VERSION=0.35.0
+ARG VERSION=0.46.0
 
 WORKDIR ${GOPATH}/src/github.com/google
 RUN git clone --branch v${VERSION} https://github.com/google/cadvisor.git
@@ -23,7 +23,7 @@ RUN apk --no-cache add libc6-compat device-mapper findutils && \
     rm -rf /var/cache/apk/*
 
 # Grab cadvisor from the staging directory.
-COPY --from=build /go/src/github.com/google/cadvisor/cadvisor /usr/bin/cadvisor
+COPY --from=build /go/src/github.com/google/cadvisor/_output/cadvisor /usr/bin/cadvisor
 
 EXPOSE 8080
 
